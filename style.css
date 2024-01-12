@@ -23,7 +23,7 @@ body {
   padding: 2rem;
 }
 
-.temp{
+.temp {
   display: none;
 }
 
@@ -62,37 +62,137 @@ nav {
 }
 
 .login {
-  display: flex;
+  display: grid;
+  row-gap: 1rem;
 }
 
-.login__input {
+.register {
+  display: grid;
+  row-gap: 1rem;
+}
+
+.nav__link--btn:link,
+.nav__link--btn:visited {
+  padding: 0.8rem 2.5rem;
+  border-radius: 3rem;
+  background-color: #5ec576;
+  font-size: large;
+  font-weight: 500;
+  text-decoration: none;
+  color: #222;
+  transition: all 0.2s;
+}
+
+.nav__link--btn:hover,
+.nav__link--btn:active {
+  color: inherit;
+  background-color: #4bbb7d;
+  color: #333;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #0000005a;
+  backdrop-filter: blur(1.5px);
+  transition: all 0.5s;
+  z-index: 5;
+}
+
+.upper-lui {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 2rem;
+  z-index: 20;
+  border: 1px solid #62a24e;
+  overflow: hidden;
+  display: grid;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  box-shadow: inset 0 0 5px 0px #7dc069;
+  transition: all 0.3s;
+  backdrop-filter: blur(10px);
+}
+
+.hidden {
+  opacity: 0;
+  pointer-events: none;
+  backdrop-filter: blur(0);
+}
+
+.hidden ~ .upper-lui {
+  transform: translate(205%, -200%) scale(0.25);
+}
+
+.login-ui {
+  padding: 2rem;
+  gap: 1rem;
+  z-index: 2;
+}
+
+.login-ui .register {
+  display: none;
+}
+
+.upper-lui p {
+  text-align: center;
+  font-size: 12px;
+  backdrop-filter: blur(5px);
+  width: 100%;
+  height: 100%;
+  padding: 1rem;
+}
+
+.upper-lui p button, .login-btn {
+  backdrop-filter: blur(5px);
+  background: none;
+  border: none;
+  outline: none;
+  font-weight: 600;
+  color: #4069da;
+  cursor: pointer;
+}
+
+.login__input,
+.register__input {
   border: none;
   padding: 1rem 2rem;
   font-size: 1.6rem;
   font-family: inherit;
   text-align: center;
-  width: 12rem;
+  width: 100%;
   border-radius: 1rem;
   margin-right: 1rem;
   color: inherit;
   border: 1px solid #fff;
+  background: #ffffff44;
   transition: all 0.3s;
-  color: #444;
+  color: #eee;
 }
 
-.login__input:focus {
+.login__input:focus,
+.register__input:focus {
   outline: none;
   border: 1px solid #ccc;
-  transform: scale(1.1);
+  transform: scale(1.05);
 
   box-shadow: 2.5px 2.5px 5px 0px #39b385, -2.5px -2.5px 5px 0px #9be15d;
 }
 
-.login__input::placeholder {
+.login__input::placeholder,
+.register__input::placeholder {
   color: #bbb;
+  font-size: 15px;
 }
 
-.login__btn {
+.login__btn,
+.register__btn {
   border: none;
   background: none;
   font-size: 2.6rem;
@@ -103,51 +203,53 @@ nav {
 }
 
 .login__btn:hover,
+.register__btn:hover,
 .btn--sort:hover,
 .form__btn:hover {
   outline: none;
-  background: #eee;
+  background: #ffffff44;
   border-radius: 8px;
-  transform: scale(1.1);
+  transform: scale(1.05);
   color: #444;
 }
 
 .login__btn:active,
+.register__btn:active,
 .btn--sort:active,
 .form__btn:active {
   outline: none;
-  background: #999;
+  opacity: 0.75;
   border-radius: 8px;
   transform: scale(0.9);
   color: #333;
 }
 
-.incorrect{
+.incorrect {
   background: #e52a5a !important;
   box-shadow: 5px 5px 5px 1px #ff585f, -5px -5px 5px 1px #e52a5a !important;
 }
 
-.incorrect::placeholder{
+.incorrect::placeholder {
   color: #eee !important;
 }
 
-.correct{
+.correct {
   background: #39b385 !important;
   border: 1px solid #9be15d;
   box-shadow: 2.5px 2.5px 5px 0px #39b385, -2.5px -2.5px 5px 0px #9be15d !important;
 }
 
-.correct::placeholder{
+.correct::placeholder {
   color: #9be15d !important;
 }
 
 /* MAIN */
 .app {
   position: relative;
-  max-width: 100rem;
+  max-width: 130rem;
   margin: 4rem auto;
   display: grid;
-  grid-template-columns: 4fr 3fr;
+  /* grid-template-columns: 1fr 5fr; */
   grid-template-rows: auto repeat(3, 15rem) auto;
   gap: 2rem;
 
@@ -183,6 +285,7 @@ nav {
 /* MOVEMENTS */
 .movements {
   grid-row: 2 / span 3;
+  width: 100%;
   background-color: #333;
   border-radius: 1rem;
   overflow: auto;
@@ -216,7 +319,17 @@ nav {
   font-size: 1.1rem;
   text-transform: uppercase;
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3rem;
   /* color: #eee; */
+}
+
+.movements__date p{
+  font-size: 1rem;
+  font-weight: 400;
+  text-transform: none;
 }
 
 .movements__type--deposit {
@@ -315,7 +428,9 @@ nav {
   box-shadow: 5px 5px 5px 0px #ff585f, -5px -5px 5px 0px #e52a5a;
 }
 
-.operation--close:hover,.operation--loan:hover,.operation--transfer:hover{
+.operation--close:hover,
+.operation--loan:hover,
+.operation--transfer:hover {
   transform: scale(1.01);
 }
 

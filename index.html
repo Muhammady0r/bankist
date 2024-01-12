@@ -18,30 +18,82 @@
     <p class="temp"></p>
     <!-- TOP NAVIGATION -->
     <nav>
-      <p class="welcome">Log in to get started</p>
+      <p class="welcome">Войдите что бы начать.</p>
       <img src="icon.png" alt="Logo" class="logo" />
-      <form class="login">
-        <input
-          type="text"
-          placeholder="user"
-          class="login__input login__input--user"
-        />
-        <!-- In practice, use type="password" -->
-        <input
-          type="text"
-          placeholder="PIN"
-          maxlength="4"
-          class="login__input login__input--pin"
-        />
-        <button class="login__btn"><i class="fa-duotone fa-right-to-bracket"></i></button>
-      </form>
+      <a class="nav__link--btn" href="#">Войти</a>
+    </nav>
+
+    <div class="overlay hidden"></div>
+
+    <nav class="upper-lui hidden">
+      <nav class="login-ui">
+        <form class="login">
+          <input
+            type="text"
+            placeholder="username"
+            class="login__input login__input--user"
+          />
+          <!-- In practice, use type="password" -->
+          <input
+            type="password"
+            placeholder="PIN"
+            maxlength="16"
+            class="login__input login__input--pin"
+          />
+          <button class="login__btn">
+            <i class="fa-duotone fa-right-to-bracket"></i>
+          </button>
+
+          <p>
+            Нету аккаунта?
+            <button class="register-btn">Создать аккаунт.</button>
+          </p>
+        </form>
+        <form class="register">
+          <input
+            type="text"
+            placeholder="name"
+            class="register__input register__input--user"
+            required
+          />
+          <input
+            type="text"
+            minlength="2"
+            maxlength="16"
+            placeholder="username (нужен для входа)"
+            class="register__input register__input--username"
+            required
+          />
+          <!-- <input
+            type="number"
+            min="1"
+            max="100"
+            placeholder="(хз что это 😂) % (1-100)"
+            class="register__input register__input--interRate"
+            required
+          /> -->
+          <input
+            type="password"
+            placeholder="PIN"
+            minlength="4"
+            maxlength="16"
+            class="register__input register__input--pin"
+            required
+          />
+          <button class="register__btn">
+            <i class="fa-duotone fa-user-plus"></i>
+          </button>
+
+          <button class="login-btn">Надаз</button>
+        </form>
+      </nav>
     </nav>
 
     <main class="app">
       <!-- BALANCE -->
       <div class="balance">
         <div>
-          <p class="balance__label">Current balance</p>
+          <p class="balance__label">Текущий баланс</p>
           <p class="balance__date">
             As of <span class="date">05/03/2037</span>
           </p>
@@ -67,56 +119,64 @@
 
       <!-- SUMMARY -->
       <div class="summary">
-        <p class="summary__label">In</p>
+        <p class="summary__label">Получено</p>
         <p class="summary__value summary__value--in">0000€</p>
-        <p class="summary__label">Out</p>
+        <p class="summary__label">Потрачено</p>
         <p class="summary__value summary__value--out">0000€</p>
-        <p class="summary__label">Interest</p>
-        <p class="summary__value summary__value--interest">0000€</p>
-        <button class="btn--sort"><i class="fa-duotone fa-arrow-down-wide-short"></i> SORT</button>
+        <!-- <p class="summary__label">Interest</p>
+        <p class="summary__value summary__value--interest">0000€</p> -->
+        <button class="btn--sort">
+          <i class="fa-duotone fa-arrow-down-wide-short"></i> Сортировать
+        </button>
       </div>
 
       <!-- OPERATION: TRANSFERS -->
       <div class="operation operation--transfer">
-        <h2>Transfer money</h2>
+        <h2>Отправить деньги</h2>
         <form class="form form--transfer">
           <input type="text" class="form__input form__input--to" />
           <input type="number" class="form__input form__input--amount" />
-          <button class="form__btn form__btn--transfer"><i class="fa-duotone fa-arrow-right"></i></button>
-          <label class="form__label">Transfer to</label>
-          <label class="form__label">Amount</label>
+          <button class="form__btn form__btn--transfer">
+            <i class="fa-duotone fa-arrow-right"></i>
+          </button>
+          <label class="form__label">Кому</label>
+          <label class="form__label">Сколько</label>
         </form>
       </div>
 
       <!-- OPERATION: LOAN -->
       <div class="operation operation--loan">
-        <h2>Request loan</h2>
+        <h2>Запросить заим</h2>
         <form class="form form--loan">
           <input type="number" class="form__input form__input--loan-amount" />
-          <button class="form__btn form__btn--loan"><i class="fa-duotone fa-slash fa-spin-pulse fa-2xs"></i></button>
-          <label class="form__label form__label--loan">Amount</label>
+          <button class="form__btn form__btn--loan">
+            <i class="fa-duotone fa-slash fa-spin-pulse fa-2xs"></i>
+          </button>
+          <label class="form__label form__label--loan">Сколько</label>
         </form>
       </div>
 
       <!-- OPERATION: CLOSE -->
       <div class="operation operation--close">
-        <h2>Close account</h2>
+        <h2>Удалить аккаунт</h2>
         <form class="form form--close">
           <input type="text" class="form__input form__input--user" />
           <input
             type="password"
-            maxlength="6"
+            maxlength="16"
             class="form__input form__input--pin"
           />
-          <button class="form__btn form__btn--close"><i class="fa-duotone fa-arrow-right"></i></button>
-          <label class="form__label">Confirm user</label>
-          <label class="form__label">Confirm PIN</label>
+          <button class="form__btn form__btn--close">
+            <i class="fa-duotone fa-arrow-right"></i>
+          </button>
+          <label class="form__label">Логин</label>
+          <label class="form__label">Пароль</label>
         </form>
       </div>
 
       <!-- LOGOUT TIMER -->
       <p class="logout-timer">
-        You will be logged out in <span class="timer">05:00</span>
+        Вы будете отлогинены через <span class="timer">05:00</span>
       </p>
     </main>
 

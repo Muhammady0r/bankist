@@ -12,20 +12,8 @@
 const tempP = document.querySelector('.temp');
 
 const usersApi = 'https://659e598b47ae28b0bd359f29.mockapi.io/api/v1/users/';
-
-fetch(`${usersApi}`, {
-  method: 'GET',
-  headers: { 'content-type': 'application/json' },
-})
-  .then(res => {
-    if (res.ok) {
-      return res.json();
-    }
-  })
-  .then(users => {
-    tempP.textContent = JSON.stringify(users);
-    // console.log(JSON.parse(tempP.textContent));
-  });
+const transfersApi =
+  'https://659e598b47ae28b0bd359f29.mockapi.io/api/v1/transfers';
 
 // const account1 = {
 //   owner: 'Jonas Schmedtmann',
@@ -83,6 +71,7 @@ const containerApp = document.querySelector('.app');
 const containerMovements = document.querySelector('.movements');
 
 const btnLogin = document.querySelector('.login__btn');
+const btnRegister = document.querySelector('.register__btn');
 const btnTransfer = document.querySelector('.form__btn--transfer');
 const btnLoan = document.querySelector('.form__btn--loan');
 const btnClose = document.querySelector('.form__btn--close');
@@ -123,18 +112,24 @@ const formatMovDate = function (date, locale) {
 
   const datePassed = calcDatePass(new Date(), date);
 
-  if (datePassed === 0) return 'Today';
-  else if (datePassed === 1) return 'Yesterday';
-  else if (datePassed > 1 && datePassed < 8) return `${datePassed} days ago`;
+  if (datePassed === 0) return 'Сегодня';
+  else if (datePassed === 1) return 'Вчера';
+  else if (datePassed > 1 && datePassed < 8) return `${datePassed} дней назад`;
   else return formatDataN(date, locale);
 };
 
-const newMov = function (amount) {
-  return `${amount}__${new Date().toISOString()}`;
+const newMov = function (amount, user, isFrom) {
+  return `${amount}__${new Date().toISOString()}__${
+    isFrom ? 'Получено от' : 'Отправлено к'
+  } ${user}`;
 };
 
 const getMov = function (mov) {
-  return [+mov.split('__')[0], new Date(mov.split('__')[1])];
+  return [
+    +mov.split('__')[0],
+    new Date(mov.split('__')[1]),
+    mov.split('__')[2],
+  ];
 };
 
 const displayMovements = function (id, sort = false) {
@@ -158,6 +153,7 @@ const displayMovements = function (id, sort = false) {
       movs.forEach(function (mov, i) {
         const value = getMov(mov)[0];
         const date = getMov(mov)[1];
+        const from = getMov(mov)[2];
 
         const type = value > 0 ? 'deposit' : 'withdrawal';
 
@@ -168,7 +164,7 @@ const displayMovements = function (id, sort = false) {
         <div class="movements__type movements__type--${type}">${
           i + 1
         } ${type}</div>
-        <div class="movements__date">${displayDate}</div>
+        <div class="movements__date">${displayDate}    <p>${from}</p></div>
         <div class="movements__value">${formatMoney(
           value,
           acc.locale,
@@ -197,6 +193,35 @@ const calcDisplayBalance = function (id) {
       let blc = acc.movements.reduce((ac, mov) => {
         return ac + getMov(mov)[0];
       }, 0);
+      if (blc == 0 && acc.movements.length == 0) {
+        blc = 10;
+        fetch(usersApi + id, {
+          method: 'PUT', // or PATCH
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ movements: [newMov(blc, 'System', true)] }),
+        });
+
+        const transfer = {
+          date: new Date().toISOString(),
+          sender: 'System',
+          receiver: acc.owner,
+          value: blc,
+        };
+
+        fetch(transfersApi, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(transfer),
+        }).then(res => {
+          if (res.ok) {
+            buttonStatus(this, 'cur');
+            // Update UI
+            updateUI(currentAccount);
+            return res.json();
+          }
+          // handle error
+        });
+      }
       // console.log(blc);
       if (blc != acc.balance) {
         fetch(usersApi + id, {
@@ -316,7 +341,7 @@ const startLogOutTimer = function () {
 
     if (time === 0) {
       clearInterval(timer);
-      labelWelcome.textContent = 'Log in to get started';
+      labelWelcome.textContent = 'Войдите что бы начать.';
       containerApp.style.opacity = 0;
     }
 
@@ -375,6 +400,127 @@ const setCurClock = function (clock) {
   curClock = clock;
 };
 
+const overlay = document.querySelector('.overlay');
+const lui = document.querySelector('.upper-lui');
+const logBtn = lui.querySelector('.login-btn');
+const regBtn = lui.querySelector('.register-btn');
+const logF = lui.querySelector('.login');
+const regF = lui.querySelector('.register');
+const inputRegisterName = regF.querySelector('.register__input--user');
+const inputRegisterUsername = regF.querySelector('.register__input--username');
+// const inputRegisterInterRate = regF.querySelector(
+//   '.register__input--interRate'
+// );
+const inputRegisterPin = regF.querySelector('.register__input--pin');
+
+const openCloseLUI = function (open) {
+  if (open) {
+    overlay.classList.remove('hidden');
+    lui.classList.remove('hidden');
+  } else {
+    overlay.classList.add('hidden');
+    lui.classList.add('hidden');
+  }
+};
+
+document
+  .querySelector('.nav__link--btn')
+  .addEventListener('click', function (e) {
+    e.preventDefault();
+    openCloseLUI(true);
+  });
+
+regBtn.addEventListener('mousedown', function () {
+  logF.style.display = 'none';
+  regF.style.display = 'grid';
+});
+
+logBtn.addEventListener('click', function () {
+  logF.style.display = 'grid';
+  regF.style.display = 'none';
+});
+
+overlay.addEventListener('click', function () {
+  openCloseLUI();
+});
+
+btnRegister.addEventListener('click', function (e) {
+  e.preventDefault();
+  const name = inputRegisterName.value;
+  const username = inputRegisterUsername.value;
+  // const interRate = +inputRegisterInterRate.value;
+  const pin = inputRegisterPin.value;
+
+  inputRegisterName.value =
+    inputRegisterUsername.value =
+    inputRegisterPin.value =
+      '';
+
+  buttonStatus(this, 'load');
+
+  if (
+    name.replaceAll(' ', '').length != 0 &&
+    // interRate >= 1 &&
+    // interRate <= 100 &&
+    // !`${interRate}`.includes('.') &&
+    username.length <= 16 &&
+    username.length >= 2 &&
+    !username.includes(' ') &&
+    pin.length >= 4 &&
+    pin.length <= 16
+  ) {
+    const user = {
+      owner: name,
+      // interestRate: interRate / 100,
+      pin: pin,
+      currency: 'USD',
+      locale: navigator.language,
+      username: username,
+      movements: [],
+      balance: -1,
+    };
+
+    fetch(usersApi, {
+      method: 'GET',
+      headers: { 'content-type': 'application/json' },
+    })
+      .then(res => {
+        if (res.ok) {
+          return res.json();
+        }
+        // handle error
+      })
+      .then(accounts => {
+        const isThere = accounts.some(acc => {
+          return acc.username == username;
+        });
+
+        if (!isThere) {
+          fetch(usersApi, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify(user),
+          }).then(res => {
+            if (res.ok) {
+              buttonStatus(this, 'cur');
+              setTimeout(() => {
+                logF.style.display = 'grid';
+                regF.style.display = 'none';
+              }, 1000);
+              return res.json();
+            } else {
+              buttonStatus(this, 'err');
+            }
+          });
+        } else {
+          buttonStatus(this, 'err');
+        }
+      });
+  } else {
+    buttonStatus(this, 'err');
+  }
+});
+
 btnLogin.addEventListener('click', function (e) {
   // Prevent form from submitting
   e.preventDefault();
@@ -394,10 +540,12 @@ btnLogin.addEventListener('click', function (e) {
         return acc.username == inputLoginUsername.value;
       });
 
-      if (acc && acc?.pin == +inputLoginPin.value) {
+      if (acc?.pin == inputLoginPin.value) {
         setCurAcc(acc.id);
         // Display UI and message
-        labelWelcome.textContent = `Welcome back, ${acc.owner.split(' ')[0]}`;
+        labelWelcome.textContent = `Добро пожаловать, ${
+          acc.owner.split(' ')[0]
+        }`;
         containerApp.style.opacity = 100;
 
         if (curClock) clearInterval(curClock);
@@ -411,6 +559,8 @@ btnLogin.addEventListener('click', function (e) {
         loginStatus(true);
 
         buttonStatus(this, 'cur');
+
+        setTimeout(openCloseLUI, 1000);
 
         // Update UI
         updateUI();
@@ -460,8 +610,8 @@ btnTransfer.addEventListener('click', function (e) {
         const user1 = curAcc.movements;
         const user2 = receiverAcc.movements;
 
-        user1.push(newMov(-amount));
-        user2.push(newMov(amount));
+        user1.push(newMov(-amount, receiverAcc.owner, false));
+        user2.push(newMov(amount, curAcc.owner, true));
 
         fetch(usersApi + currentAccount, {
           method: 'PUT', // or PATCH
@@ -475,9 +625,26 @@ btnTransfer.addEventListener('click', function (e) {
               body: JSON.stringify({ movements: user2 }),
             }).then(res => {
               if (res.ok) {
-                buttonStatus(this, 'cur');
-                // Update UI
-                updateUI(currentAccount);
+                const transfer = {
+                  date: new Date().toISOString(),
+                  sender: curAcc.owner,
+                  receiver: receiverAcc.owner,
+                  value: amount,
+                };
+
+                fetch(transfersApi, {
+                  method: 'POST',
+                  headers: { 'content-type': 'application/json' },
+                  body: JSON.stringify(transfer),
+                }).then(res => {
+                  if (res.ok) {
+                    buttonStatus(this, 'cur');
+                    // Update UI
+                    updateUI(currentAccount);
+                    return res.json();
+                  }
+                  // handle error
+                });
                 return res.json();
               }
               buttonStatus(this, 'err');
@@ -520,7 +687,7 @@ btnLoan.addEventListener('click', function (e) {
         // Add movement
 
         const curMovs = acc.movements;
-        curMovs.push(newMov(amount));
+        curMovs.push(newMov(amount, 'System', true));
 
         fetch(usersApi + acc.id, {
           method: 'PUT', // or PATCH
@@ -528,10 +695,26 @@ btnLoan.addEventListener('click', function (e) {
           body: JSON.stringify({ movements: curMovs }),
         }).then(res => {
           if (res.ok) {
-            buttonStatus(btnLoan, 'cur');
+            const transfer = {
+              date: new Date().toISOString(),
+              sender: 'System',
+              receiver: acc.owner,
+              value: amount,
+            };
 
-            // Update UI
-            updateUI(currentAccount);
+            fetch(transfersApi, {
+              method: 'POST',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify(transfer),
+            }).then(res => {
+              if (res.ok) {
+                buttonStatus(this, 'cur');
+                // Update UI
+                updateUI(currentAccount);
+                return res.json();
+              }
+              // handle error
+            });
             return res.json();
           }
           // handle error
@@ -564,7 +747,7 @@ btnClose.addEventListener('click', function (e) {
     .then(acc => {
       if (
         inputCloseUsername.value == acc.username &&
-        +inputClosePin.value == acc.pin
+        inputClosePin.value == acc.pin
       ) {
         fetch(usersApi + acc.id, {
           method: 'DELETE',
